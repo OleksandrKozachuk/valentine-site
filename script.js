@@ -5,7 +5,7 @@ const CONFIG = {
     "Happy Valentine’s Day ❤️\nYou’re my favorite person.\n\nPress play 😘",
 
   // No->Yes becomes two Yes buttons; revert after 1 minute:
-  revertAfterMs: 60_000,
+  revertAfterMs: 60000,
 
   // Sky personalization: change to something meaningful (date / inside joke)
   skySeed: "our-valentine-2026",
@@ -91,14 +91,14 @@ function closeAll() {
 function stopVideo() {
   if (!el.video) return;
   el.video.pause();
-  try { el.video.currentTime = 0; } catch {}
+  try { el.video.currentTime = 0; } catch (err) {}
 }
 
 // ---------- No button dodge logic ----------
 let noAttempts = 0;
-let lastPointerAttemptTs = 0;
 let noIsConverted = false;
 let revertTimer = null;
+const supportsPointerEvents = "PointerEvent" in window;
 
 const messages = [
   "Not today",
@@ -163,7 +163,6 @@ function handleNoAttempt(e) {
   e.stopPropagation();
 
   noAttempts += 1;
-  lastPointerAttemptTs = performance.now();
 
   moveNoButton();
 
@@ -184,9 +183,8 @@ el.noBtn.addEventListener("pointerdown", handleNoAttempt, { passive: false });
 // If converted to YES, clicking it should act like YES
 el.noBtn.addEventListener("click", (e) => {
   if (!noIsConverted) {
-    // Avoid double-count when pointerdown already fired
-    const now = performance.now();
-    if (now - lastPointerAttemptTs < 250) {
+    // Pointer input already hits pointerdown; keep click for keyboard fallback only.
+    if (supportsPointerEvents && e.detail > 0) {
       e.preventDefault();
       e.stopPropagation();
       return;
@@ -464,7 +462,15 @@ function completeHeart() {
   // Switch to video view ONLY now:
   showScreen("video");
   // attempt to play
-  el.video?.play().catch(() => {});
+  playVideoSafely();
+}
+
+function playVideoSafely() {
+  if (!el.video || typeof el.video.play !== "function") return;
+  const playPromise = el.video.play();
+  if (playPromise && typeof playPromise.catch === "function") {
+    playPromise.catch(() => {});
+  }
 }
 
 function onCanvasPointerDown(evt) {
@@ -540,8 +546,10 @@ function handleViewportResize() {
 }
 
 window.addEventListener("resize", handleViewportResize);
-window.visualViewport?.addEventListener("resize", handleViewportResize);
-window.visualViewport?.addEventListener("scroll", handleViewportResize);
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", handleViewportResize);
+  window.visualViewport.addEventListener("scroll", handleViewportResize);
+}
 
 // Keep "No" sane after resize
 window.addEventListener("resize", () => {
