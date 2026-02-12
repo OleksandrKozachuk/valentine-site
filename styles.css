@@ -25,6 +25,10 @@ body{
     linear-gradient(180deg, #fff, #ffe6ef);
 }
 
+body.modal-open{
+  overflow:hidden;
+}
+
 .page{
   width:min(920px, 92vw);
   padding:24px 0;
@@ -74,12 +78,12 @@ h1{
 .btn-area{
   margin-top:16px;
   position:relative;
-  min-height:78px;
+  min-height:110px;
   display:flex;
   gap:12px;
   align-items:center;
   flex-wrap:wrap;
-  padding:6px;
+  padding:10px;
   border-radius:16px;
   border:1px dashed rgba(255,63,122,.25);
   background:rgba(255,255,255,.35);
@@ -149,7 +153,7 @@ h1{
   transition: opacity .2s ease, transform .2s ease;
   max-width:min(92vw, 520px);
   text-align:center;
-  z-index:30;
+  z-index:80;
 }
 
 .toast.show{
@@ -157,23 +161,27 @@ h1{
   transform:translateX(-50%) translateY(0);
 }
 
-/* FULLSCREEN overlay + screens */
+/* Overlay base */
 .overlay{
   position:fixed;
   inset:0;
   display:none;
-  z-index:20;
+  z-index:60;
 }
 
 .overlay.show{
   display:block;
 }
 
+/* Screen base */
 .screen{
   position:absolute;
   inset:0;
   display:flex;
   flex-direction:column;
+
+  /* best for phones */
+  height:100dvh;
   padding:
     calc(14px + env(safe-area-inset-top))
     calc(14px + env(safe-area-inset-right))
@@ -181,22 +189,7 @@ h1{
     calc(14px + env(safe-area-inset-left));
 }
 
-.sky-screen{
-  background:
-    radial-gradient(1200px 800px at 18% 12%, rgba(255,255,255,.10), transparent 65%),
-    radial-gradient(1200px 800px at 82% 28%, rgba(255,255,255,.07), transparent 65%),
-    linear-gradient(180deg, rgba(10,12,22,.98), rgba(24,12,26,.98));
-  color:#fff;
-}
-
-.video-screen{
-  background:
-    radial-gradient(1200px 900px at 20% 10%, rgba(255,255,255,.10), transparent 65%),
-    radial-gradient(1200px 900px at 80% 30%, rgba(255,255,255,.08), transparent 65%),
-    linear-gradient(180deg, rgba(16,10,20,.98), rgba(10,12,22,.98));
-  color:#fff;
-}
-
+/* Topbar */
 .topbar{
   display:flex;
   align-items:center;
@@ -218,16 +211,88 @@ h1{
 .top-title{
   font-weight:950;
   letter-spacing:.2px;
+  color:#fff;
 }
 
 .top-subtitle{
   opacity:.85;
   font-size:13px;
+  color:#fff;
+}
+
+/* Confirm screen */
+.confirm-screen{
+  background:
+    radial-gradient(1200px 900px at 20% 10%, rgba(255,255,255,.10), transparent 65%),
+    radial-gradient(1200px 900px at 80% 30%, rgba(255,255,255,.08), transparent 65%),
+    linear-gradient(180deg, rgba(16,10,20,.98), rgba(10,12,22,.98));
+  color:#fff;
+}
+
+.confirm-body{
+  margin-top:12px;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  align-items:center;
+  justify-content:flex-start;
+}
+
+.confirm-img{
+  width:min(520px, 96%);
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.2);
+}
+
+.confirm-text{
+  width:min(520px, 96%);
+  text-align:center;
+}
+
+.confirm-title{
+  margin:0;
+  font-size: clamp(20px, 3vw, 26px);
+  font-weight:950;
+}
+
+.confirm-subtitle{
+  margin:8px 0 0;
+  opacity:.9;
+  line-height:1.4;
+}
+
+.confirm-actions{
+  width:min(520px, 96%);
+  display:flex;
+  gap:10px;
+}
+
+.confirm-actions .btn{
+  flex:1;
+}
+
+.confirm-note{
+  margin:0;
+  opacity:.8;
+  font-size:13px;
+}
+
+/* Sky screen */
+.sky-screen{
+  background:
+    radial-gradient(1200px 800px at 18% 12%, rgba(255,255,255,.10), transparent 65%),
+    radial-gradient(1200px 800px at 82% 28%, rgba(255,255,255,.07), transparent 65%),
+    linear-gradient(180deg, rgba(10,12,22,.98), rgba(24,12,26,.98));
+  color:#fff;
 }
 
 .instructions{
   margin-top:12px;
-  padding:12px 12px;
+  padding:12px;
   border-radius:16px;
   background:rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.10);
@@ -239,8 +304,10 @@ h1{
   font-size:13px;
 }
 
+/* iOS flex fix */
 .canvas-wrap{
-  flex:1;
+  flex: 1 1 auto;
+  min-height: 0;
   margin-top:12px;
   border-radius:18px;
   overflow:hidden;
@@ -252,8 +319,7 @@ h1{
   width:100%;
   height:100%;
   display:block;
-  /* helps on phones so dragging doesn't scroll */
-  touch-action:none;
+  touch-action:none; /* prevents scroll/zoom while tapping */
 }
 
 .bottombar{
@@ -275,9 +341,20 @@ h1{
   .bottombar .btn{
     width:100%;
   }
+  .confirm-actions{
+    flex-direction:column;
+  }
 }
 
-/* video screen content */
+/* Video screen */
+.video-screen{
+  background:
+    radial-gradient(1200px 900px at 20% 10%, rgba(255,255,255,.10), transparent 65%),
+    radial-gradient(1200px 900px at 80% 30%, rgba(255,255,255,.08), transparent 65%),
+    linear-gradient(180deg, rgba(16,10,20,.98), rgba(10,12,22,.98));
+  color:#fff;
+}
+
 .video-content{
   margin-top:14px;
   display:flex;
@@ -299,7 +376,7 @@ h1{
 
 .video{
   width:100%;
-  max-height: 58svh;
+  max-height: 58dvh;
   border-radius:18px;
   border:1px solid rgba(255,255,255,.14);
   background:#000;

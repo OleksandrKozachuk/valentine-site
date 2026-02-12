@@ -33,15 +33,52 @@
 
   <!-- FULLSCREEN OVERLAY -->
   <div id="overlay" class="overlay" aria-hidden="true">
+
+    <!-- CONFIRM SCREEN -->
+    <section id="confirmScreen" class="screen confirm-screen" aria-label="Confirmation screen">
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="top-title">💗 Are you sure?</div>
+          <div class="top-subtitle">This is a very serious question 😌</div>
+        </div>
+        <button id="closeOverlay" class="btn ghost small" type="button">Close</button>
+      </header>
+
+      <div class="confirm-body">
+        <img
+          id="confirmImg"
+          class="confirm-img"
+          src="assets/confirm.jpg"
+          alt="A cute photo"
+          loading="eager"
+        />
+
+        <div class="confirm-text">
+          <p class="confirm-title">Are you REALLY sure? 🥺</p>
+          <p class="confirm-subtitle">
+            If you say yes… there’s a surprise waiting.
+          </p>
+        </div>
+
+        <div class="confirm-actions">
+          <button id="confirmNo" class="btn ghost" type="button">No 🙈</button>
+          <button id="confirmYes" class="btn yes" type="button">Yes 💞</button>
+        </div>
+
+        <p class="confirm-note">
+          (Put your image at <code>assets/confirm.jpg</code>)
+        </p>
+      </div>
+    </section>
+
     <!-- SKY SCREEN -->
-    <section id="skyScreen" class="screen sky-screen" aria-label="Constellation screen">
+    <section id="skyScreen" class="screen sky-screen" hidden aria-label="Constellation screen">
       <header class="topbar">
         <div class="topbar-left">
           <div class="top-title">✨ Constellation of Us</div>
           <div id="progress" class="top-subtitle">Tap the glowing star (1/1)</div>
         </div>
-
-        <button id="closeOverlay" class="btn ghost small" type="button">Close</button>
+        <button id="closeSky" class="btn ghost small" type="button">Close</button>
       </header>
 
       <div class="instructions">
@@ -56,11 +93,11 @@
       <footer class="bottombar">
         <button id="resetSky" class="btn ghost" type="button">Reset</button>
         <button id="hintSky" class="btn ghost" type="button">Hint</button>
-        <button id="autoHelp" class="btn ghost" type="button">Tap Assist: ON</button>
+        <button id="tapAssistBtn" class="btn ghost" type="button">Tap Assist: ON</button>
       </footer>
     </section>
 
-    <!-- VIDEO SCREEN -->
+    <!-- VIDEO SCREEN (ONLY SHOWN AFTER HEART COMPLETE) -->
     <section id="videoScreen" class="screen video-screen" hidden aria-label="Video screen">
       <header class="topbar">
         <div class="topbar-left">
@@ -86,12 +123,13 @@
         </video>
 
         <p class="video-note">
-          Put your video at <code>assets/valentine.mp4</code> (or change the src in <code>index.html</code>).
+          Put your video at <code>assets/valentine.mp4</code>
         </p>
 
-        <button id="backToSky" class="btn ghost" type="button">Back to the sky</button>
+        <button id="restart" class="btn ghost" type="button">Restart 💫</button>
       </div>
     </section>
+
   </div>
 
   <script src="script.js"></script>
