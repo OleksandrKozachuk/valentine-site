@@ -540,4 +540,39 @@ function onCanvasPointerDown(evt) {
 
 function animate() {
   if (!el.skyScreen.hidden && skyReady) {
-    if (hintPulse > 0) hintPulse
+    if (hintPulse > 0) hintPulse = Math.max(0, hintPulse - 0.03);
+    drawSky();
+  }
+  requestAnimationFrame(animate);
+}
+
+// Buttons
+el.resetSky.addEventListener("click", () => { startSky(true); showToast("Reset ✨"); });
+el.hintSky.addEventListener("click", () => { hintPulse = 1; showToast("Look for the glow ✨"); });
+el.tapAssistBtn.addEventListener("click", () => {
+  tapAssistOn = !tapAssistOn;
+  el.tapAssistBtn.textContent = `Tap Assist: ${tapAssistOn ? "ON" : "OFF"}`;
+  showToast(tapAssistOn ? "Tap Assist enabled ✅" : "Tap Assist disabled");
+});
+
+el.canvas.addEventListener("pointerdown", onCanvasPointerDown, { passive: false });
+
+// ResizeObserver = reliable sizing on phone + PC
+const ro = new ResizeObserver(() => {
+  if (el.skyScreen.hidden) return;
+  if (!el.overlay.classList.contains("show")) return;
+  startSky(false);
+});
+ro.observe(el.canvasWrap);
+
+// Keep "No" sane after resize
+window.addEventListener("resize", () => {
+  if (!noIsConverted) {
+    el.noBtn.style.position = "relative";
+    el.noBtn.style.left = "auto";
+    el.noBtn.style.top = "auto";
+  }
+});
+
+// Start loop
+requestAnimationFrame(animate);
