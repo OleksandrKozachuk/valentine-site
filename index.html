@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>❤️ Valentine</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page">
+    <section class="card">
+      <div class="badge">💘 Valentine’s Prompt</div>
+
+      <h1>
+        Hey <span id="herName" class="name">my love</span> ❤️<br />
+        Will you be my Valentine?
+      </h1>
+
+      <p class="subtitle">
+        I made this tiny website just for you.
+      </p>
+
+      <div id="btnArea" class="btn-area">
+        <button id="yesBtn" class="btn yes" type="button">Yes 💞</button>
+        <button id="noBtn" class="btn no" type="button">No 🙈</button>
+      </div>
+
+      <p class="hint">(Try clicking “No”… if you can 😄)</p>
+    </section>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </main>
+
+  <!-- FULLSCREEN OVERLAY -->
+  <div id="overlay" class="overlay" aria-hidden="true">
+    <!-- SKY SCREEN -->
+    <section id="skyScreen" class="screen sky-screen" aria-label="Constellation screen">
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="top-title">✨ Constellation of Us</div>
+          <div id="progress" class="top-subtitle">Tap the glowing star (1/1)</div>
+        </div>
+
+        <button id="closeOverlay" class="btn ghost small" type="button">Close</button>
+      </header>
+
+      <div class="instructions">
+        Connect the stars in order to draw a <b>closed</b> heart 💗<br />
+        <span class="muted">Last step: tap the <b>first</b> star again to close it.</span>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="skyCanvas" class="sky-canvas" aria-label="Night sky constellation"></canvas>
+      </div>
+
+      <footer class="bottombar">
+        <button id="resetSky" class="btn ghost" type="button">Reset</button>
+        <button id="hintSky" class="btn ghost" type="button">Hint</button>
+        <button id="autoHelp" class="btn ghost" type="button">Tap Assist: ON</button>
+      </footer>
+    </section>
+
+    <!-- VIDEO SCREEN -->
+    <section id="videoScreen" class="screen video-screen" hidden aria-label="Video screen">
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="top-title">🥰 Unlocked</div>
+          <div class="top-subtitle">Happy Valentine’s Day ❤️</div>
+        </div>
+        <button id="closeVideo" class="btn ghost small" type="button">Close</button>
+      </header>
+
+      <div class="video-content">
+        <p id="sweetMsg" class="sweet-msg">
+          Happy Valentine’s Day ❤️ I’m so lucky to have you.
+        </p>
+
+        <video
+          id="valentineVideo"
+          class="video"
+          controls
+          playsinline
+          preload="metadata"
+          src="assets/valentine.mp4">
+          Sorry — your browser can’t play this video.
+        </video>
+
+        <p class="video-note">
+          Put your video at <code>assets/valentine.mp4</code> (or change the src in <code>index.html</code>).
+        </p>
+
+        <button id="backToSky" class="btn ghost" type="button">Back to the sky</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
