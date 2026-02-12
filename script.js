@@ -24,6 +24,8 @@ const el = {
   skyScreen: document.getElementById("skyScreen"),
   videoScreen: document.getElementById("videoScreen"),
 
+  confirmImg: document.getElementById("confirmImg"),
+
   closeOverlay: document.getElementById("closeOverlay"),
   confirmYes: document.getElementById("confirmYes"),
   confirmNo: document.getElementById("confirmNo"),
@@ -33,6 +35,7 @@ const el = {
   restart: document.getElementById("restart"),
 
   progress: document.getElementById("progress"),
+  canvasWrap: document.getElementById("canvasWrap"),
   canvas: document.getElementById("skyCanvas"),
   resetSky: document.getElementById("resetSky"),
   hintSky: document.getElementById("hintSky"),
@@ -54,7 +57,7 @@ function showToast(text) {
   showToast._t = window.setTimeout(() => el.toast.classList.remove("show"), 1100);
 }
 
-// ---------- Overlay helpers ----------
+// ---------- Overlay + screen switching ----------
 function overlayOn() {
   el.overlay.classList.add("show");
   el.overlay.setAttribute("aria-hidden", "false");
@@ -72,66 +75,74 @@ function showScreen(which) {
   el.videoScreen.hidden = which !== "video";
 }
 
+// ---------- Confirm image: auto-try common extensions ----------
+function setupConfirmImageFallback() {
+  const candidates = [
+    "assets/confirm.jpeg",
+    "assets/confirm.jpg",
+    "assets/confirm.png",
+    "assets/confirm.webp",
+  ];
+  let i = 0;
+
+  const tryNext = () => {
+    if (i >= candidates.length) {
+      // If nothing found, make it obvious why
+      el.confirmImg.alt = "Image missing. Put confirm.jpg (or .jpeg/.png) in assets/";
+      showToast("Add your image: assets/confirm.jpg (or .jpeg/.png)");
+      return;
+    }
+    el.confirmImg.src = candidates[i++];
+  };
+
+  el.confirmImg.onerror = tryNext;
+  // start attempt
+  tryNext();
+}
+setupConfirmImageFallback();
+
 // ---------- Video helpers ----------
 function clearVideoError() {
   el.videoErrorBox.hidden = true;
   el.videoErrorBox.textContent = "";
 }
-
-function showVideoError(msg) {
+function showVideoError(html) {
   el.videoErrorBox.hidden = false;
-  el.videoErrorBox.innerHTML = msg;
+  el.videoErrorBox.innerHTML = html;
 }
-
 function stopVideo() {
   if (!el.video) return;
   try { el.video.pause(); } catch {}
   try { el.video.currentTime = 0; } catch {}
 }
-
-function loadAndPlayVideo() {
-  if (!el.video) return;
+function loadVideo() {
   clearVideoError();
-
-  // Force reload sources when switching screens
   try { el.video.load(); } catch {}
-
-  const p = el.video.play?.();
+}
+function tryPlayVideo() {
+  const p = el.video?.play?.();
   if (p && typeof p.catch === "function") p.catch(() => {});
 }
 
-// Handle decode/load errors with a useful explanation
 if (el.video) {
   el.video.addEventListener("error", () => {
-    // If path is wrong, el.video.error is often set too.
-    // Safari/Chrome both show "no supported format..." for codec or wrong file sometimes.
-    const hint =
-      `⚠️ I couldn’t play the video.<br><br>
-       <b>Check 1:</b> Make sure the file exists exactly at <code>assets/valentine.mp4</code> (case-sensitive on GitHub).<br>
-       <b>Check 2:</b> Your MP4 must be H.264 + AAC (some iPhone videos are HEVC/H.265 and won’t play in some browsers).<br><br>
-       <b>Fix (recommended):</b> Re-encode with ffmpeg:<br>
-       <code>ffmpeg -i input.mp4 -c:v libx264 -crf 26 -preset slow -c:a aac -b:a 128k -movflags +faststart assets/valentine.mp4</code>`;
-    showVideoError(hint);
+    showVideoError(
+      `⚠️ Video can’t play.<br><br>
+       <b>Check path:</b> <code>assets/valentine.mp4</code> (case-sensitive on GitHub).<br>
+       <b>Codec:</b> MP4 must be H.264 + AAC (many iPhone videos are HEVC/H.265).<br><br>
+       <b>Fix with ffmpeg:</b><br>
+       <code>ffmpeg -i input.mp4 -c:v libx264 -crf 26 -preset slow -c:a aac -b:a 128k -movflags +faststart assets/valentine.mp4</code>`
+    );
   });
 }
 
-// ---------- Close / reset all ----------
-function resetConstellationStateOnly() {
-  clickedSeqPos = 0;
-  hintPulse = 0;
-  skyReady = false;
-  bgStars = [];
-  heartStars = [];
-  seq = [];
-  updateProgressText(); // safe even if seq empty
-}
-
+// ---------- Close all ----------
 function closeAll() {
   overlayOff();
   showScreen("confirm");
   stopVideo();
   clearVideoError();
-  resetConstellationStateOnly();
+  resetSkyState();
 }
 
 // ---------- No button dodge logic ----------
@@ -160,11 +171,8 @@ function moveNoButton() {
   const maxLeft = Math.max(padding, areaRect.width - btnRect.width - padding);
   const maxTop = Math.max(padding, areaRect.height - btnRect.height - padding);
 
-  const left = rand(padding, maxLeft);
-  const top = rand(padding, maxTop);
-
-  el.noBtn.style.left = `${left}px`;
-  el.noBtn.style.top = `${top}px`;
+  el.noBtn.style.left = `${rand(padding, maxLeft)}px`;
+  el.noBtn.style.top = `${rand(padding, maxTop)}px`;
 }
 
 function setNoAsNo() {
@@ -206,20 +214,19 @@ function handleNoAttempt(e) {
     const idx = Math.min(messages.length - 1, (noAttempts / 3) - 1);
     showToast(messages[idx]);
   }
-
   if (noAttempts % 9 === 0) {
     setNoAsYes();
     showToast("Fine… YES 😅");
   }
 }
 
-// Dodge when user tries to tap/click it
+// dodge on intent (tap/click)
 el.noBtn.addEventListener("pointerdown", handleNoAttempt, { passive: false });
 
-// If converted to YES, clicking it acts like YES flow
+// if it became YES, clicking it starts YES flow
 el.noBtn.addEventListener("click", (e) => {
   if (!noIsConverted) {
-    // pointerdown already handled real clicks/taps
+    // pointerdown already handled; prevent noisy click behavior
     e.preventDefault();
     e.stopPropagation();
     return;
@@ -227,11 +234,11 @@ el.noBtn.addEventListener("click", (e) => {
   startConfirmFlow();
 });
 
-// ---------- YES flow: Confirm -> Sky -> Video ----------
+// ---------- YES flow: Confirm -> Sky -> Video (ONLY after heart complete) ----------
 function startConfirmFlow() {
   stopVideo();
   clearVideoError();
-  resetConstellationStateOnly();
+  resetSkyState();
 
   overlayOn();
   showScreen("confirm");
@@ -247,9 +254,8 @@ el.confirmNo.addEventListener("click", () => {
 
 el.confirmYes.addEventListener("click", () => {
   showScreen("sky");
-
-  // IMPORTANT: wait for layout so canvas isn't 0x0 on phones
-  ensureSkyReady();
+  // Ensure canvas is sized AFTER it becomes visible
+  startSky();
   showToast("Tap the glowing star ✨");
 });
 
@@ -261,12 +267,11 @@ el.restart.addEventListener("click", () => {
   stopVideo();
   clearVideoError();
   showScreen("sky");
-  resetConstellationStateOnly();
-  ensureSkyReady();
+  startSky(true);
   showToast("Let’s do it again ✨");
 });
 
-// ---------- Constellation (Canvas) ----------
+// ---------- Sky (Canvas) ----------
 const ctx = el.canvas.getContext("2d");
 
 let cssW = 0, cssH = 0, dpr = 1;
@@ -280,7 +285,16 @@ let skyReady = false;
 
 el.tapAssistBtn.textContent = `Tap Assist: ${tapAssistOn ? "ON" : "OFF"}`;
 
-// seeded RNG
+function resetSkyState() {
+  bgStars = [];
+  heartStars = [];
+  seq = [];
+  clickedSeqPos = 0;
+  hintPulse = 0;
+  skyReady = false;
+  updateProgressText();
+}
+
 function xmur3(str) {
   let h = 1779033703 ^ str.length;
   for (let i = 0; i < str.length; i++) {
@@ -302,41 +316,45 @@ function mulberry32(a) {
   };
 }
 
-function resizeCanvasToCSS() {
-  const rect = el.canvas.getBoundingClientRect();
-  cssW = Math.max(0, rect.width);
-  cssH = Math.max(0, rect.height);
+function resizeCanvas() {
+  const rect = el.canvasWrap.getBoundingClientRect();
+  cssW = rect.width;
+  cssH = rect.height;
+
+  // If wrapper is not sized yet, don’t build
+  if (cssW < 40 || cssH < 40) return false;
 
   dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-  el.canvas.width = Math.max(1, Math.floor(cssW * dpr));
-  el.canvas.height = Math.max(1, Math.floor(cssH * dpr));
+  el.canvas.width = Math.floor(cssW * dpr);
+  el.canvas.height = Math.floor(cssH * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return true;
 }
 
-function generateSky() {
+function buildSky() {
   const seedFn = xmur3(CONFIG.skySeed);
   const rng = mulberry32(seedFn());
 
-  const bgCount = Math.floor((cssW * cssH) / 12000);
-  bgStars = Array.from({ length: Math.max(90, bgCount) }, () => ({
+  const bgCount = Math.max(120, Math.floor((cssW * cssH) / 9000));
+  bgStars = Array.from({ length: bgCount }, () => ({
     x: rng() * cssW,
     y: rng() * cssH,
     r: 0.6 + rng() * 1.8,
-    a: 0.10 + rng() * 0.35,
+    a: 0.08 + rng() * 0.35,
     tw: rng() * 1000
   }));
 
   const n = Math.max(8, CONFIG.heartStarCount);
+
   const pts = [];
   for (let i = 0; i < n; i++) {
     const t = (i / n) * Math.PI * 2;
     const x = 16 * Math.pow(Math.sin(t), 3);
-    const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+    const y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
     pts.push({ x, y });
   }
 
-  const xs = pts.map(p => p.x);
-  const ys = pts.map(p => p.y);
+  const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
   const minX = Math.min(...xs), maxX = Math.max(...xs);
   const minY = Math.min(...ys), maxY = Math.max(...ys);
 
@@ -349,18 +367,18 @@ function generateSky() {
   const w = cssW - margin * 2;
   const h = cssH - margin * 2;
 
-  heartStars = norm.map((p, i) => {
-    const jx = (rng() - 0.5) * 10;
-    const jy = (rng() - 0.5) * 10;
-    return {
-      x: margin + p.x * w + jx,
-      y: margin + (1 - p.y) * h + jy,
-      idx: i
-    };
-  });
+  heartStars = norm.map((p) => ({
+    x: margin + p.x * w + (rng() - 0.5) * 10,
+    y: margin + (1 - p.y) * h + (rng() - 0.5) * 10,
+  }));
 
   seq = Array.from({ length: n }, (_, i) => i);
   seq.push(0); // close the heart
+
+  clickedSeqPos = 0;
+  hintPulse = 0;
+  updateProgressText();
+  skyReady = true;
 }
 
 function updateProgressText() {
@@ -369,34 +387,24 @@ function updateProgressText() {
   el.progress.textContent = `Tap the glowing star (${step}/${total})`;
 }
 
-function prepareConstellation() {
-  resizeCanvasToCSS();
+function startSky(forceRebuild = false) {
+  resetSkyState();
 
-  // If still 0-sized (mobile layout not ready), retry next frame
-  if (cssW < 20 || cssH < 20) {
-    skyReady = false;
-    return false;
-  }
-
-  clickedSeqPos = 0;
-  hintPulse = 0;
-
-  generateSky();
-  updateProgressText();
-  skyReady = true;
-  drawSky();
-  return true;
-}
-
-// Keeps retrying until the canvas has a real size on mobile
-function ensureSkyReady() {
-  requestAnimationFrame(() => {
-    // must be visible
+  // Wait for layout & try repeatedly until wrapper has size
+  const attempt = () => {
     if (el.skyScreen.hidden) return;
 
-    const ok = prepareConstellation();
-    if (!ok) ensureSkyReady();
-  });
+    if (!resizeCanvas()) {
+      requestAnimationFrame(attempt);
+      return;
+    }
+
+    if (forceRebuild || !skyReady) buildSky();
+    drawSky();
+  };
+
+  // Two frames helps on iOS/Android
+  requestAnimationFrame(() => requestAnimationFrame(attempt));
 }
 
 function drawSky() {
@@ -405,12 +413,14 @@ function drawSky() {
   ctx.clearRect(0, 0, cssW, cssH);
   const now = performance.now();
 
+  // glow background
   const bg = ctx.createRadialGradient(cssW * 0.2, cssH * 0.15, 10, cssW * 0.5, cssH * 0.6, Math.max(cssW, cssH));
   bg.addColorStop(0, "rgba(255,255,255,0.10)");
   bg.addColorStop(1, "rgba(0,0,0,0.35)");
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, cssW, cssH);
 
+  // bg stars
   for (const s of bgStars) {
     const tw = 0.6 + 0.4 * Math.sin((now + s.tw) / 700);
     ctx.beginPath();
@@ -419,6 +429,7 @@ function drawSky() {
     ctx.fill();
   }
 
+  // lines
   if (clickedSeqPos > 1) {
     ctx.save();
     ctx.lineWidth = Math.max(2, Math.min(4, cssW / 240));
@@ -429,7 +440,6 @@ function drawSky() {
     ctx.beginPath();
     const firstIdx = seq[0];
     ctx.moveTo(heartStars[firstIdx].x, heartStars[firstIdx].y);
-
     for (let k = 1; k < clickedSeqPos; k++) {
       const idx = seq[k];
       ctx.lineTo(heartStars[idx].x, heartStars[idx].y);
@@ -450,13 +460,12 @@ function drawSky() {
     }
 
     const isNext = (i === nextIdx) && (clickedSeqPos < seq.length);
-
-    const coreR = Math.max(4.8, Math.min(7.4, cssW / 140));
+    const coreR = Math.max(5, Math.min(8, cssW / 140));
     const haloR = isNext ? coreR * 3.2 : coreR * 2.6;
 
     ctx.save();
     ctx.beginPath();
-    ctx.fillStyle = visited ? "rgba(255,255,255,0.95)" : `rgba(255,255,255,${isNext ? 0.88 : 0.45})`;
+    ctx.fillStyle = visited ? "rgba(255,255,255,0.95)" : `rgba(255,255,255,${isNext ? 0.90 : 0.45})`;
     ctx.shadowColor = "rgba(255, 90, 140, 0.65)";
     ctx.shadowBlur = isNext ? 26 : (visited ? 18 : 12);
     ctx.arc(s.x, s.y, visited ? coreR * 1.05 : coreR, 0, Math.PI * 2);
@@ -469,7 +478,6 @@ function drawSky() {
     ctx.lineWidth = visited ? 2 : 1;
     ctx.arc(s.x, s.y, haloR, 0, Math.PI * 2);
     ctx.stroke();
-
     ctx.restore();
   }
 
@@ -503,7 +511,8 @@ function findNearestStar(x, y, radius) {
 function completeHeart() {
   showToast("Heart completed 💗");
   showScreen("video");
-  loadAndPlayVideo();
+  loadVideo();
+  tryPlayVideo();
 }
 
 function onCanvasPointerDown(evt) {
@@ -519,74 +528,16 @@ function onCanvasPointerDown(evt) {
   const radius = tapAssistOn ? CONFIG.tapAssistRadius : 18;
   const hit = findNearestStar(x, y, radius);
 
-  if (hit === -1) {
-    showToast("Tap near the glowing star ✨");
-    hintPulse = 1;
-    return;
-  }
-
-  if (hit !== nextIdx) {
-    showToast("Not that one 😉");
-    hintPulse = 1;
-    return;
-  }
+  if (hit === -1) { showToast("Tap near the glowing star ✨"); hintPulse = 1; return; }
+  if (hit !== nextIdx) { showToast("Not that one 😉"); hintPulse = 1; return; }
 
   clickedSeqPos++;
   updateProgressText();
 
-  if (clickedSeqPos >= seq.length) {
-    setTimeout(completeHeart, 250);
-  } else {
-    showToast("✨");
-  }
+  if (clickedSeqPos >= seq.length) setTimeout(completeHeart, 250);
+  else showToast("✨");
 }
 
 function animate() {
   if (!el.skyScreen.hidden && skyReady) {
-    if (hintPulse > 0) hintPulse = Math.max(0, hintPulse - 0.03);
-    drawSky();
-  }
-  requestAnimationFrame(animate);
-}
-
-// Controls
-el.resetSky.addEventListener("click", () => {
-  resetConstellationStateOnly();
-  ensureSkyReady();
-  showToast("Reset ✨");
-});
-el.hintSky.addEventListener("click", () => {
-  hintPulse = 1;
-  showToast("Look for the glow ✨");
-});
-el.tapAssistBtn.addEventListener("click", () => {
-  tapAssistOn = !tapAssistOn;
-  el.tapAssistBtn.textContent = `Tap Assist: ${tapAssistOn ? "ON" : "OFF"}`;
-  showToast(tapAssistOn ? "Tap Assist enabled ✅" : "Tap Assist disabled");
-});
-
-el.canvas.addEventListener("pointerdown", onCanvasPointerDown, { passive: false });
-
-// Resizing (including mobile address bar changes)
-function handleViewportResize() {
-  if (!el.overlay.classList.contains("show")) return;
-  if (el.skyScreen.hidden) return;
-  ensureSkyReady();
-}
-window.addEventListener("resize", handleViewportResize);
-if (window.visualViewport) {
-  window.visualViewport.addEventListener("resize", handleViewportResize);
-  window.visualViewport.addEventListener("scroll", handleViewportResize);
-}
-
-// Keep "No" sane after resize
-window.addEventListener("resize", () => {
-  if (!noIsConverted) {
-    el.noBtn.style.position = "relative";
-    el.noBtn.style.left = "auto";
-    el.noBtn.style.top = "auto";
-  }
-});
-
-// Start
-requestAnimationFrame(animate);
+    if (hintPulse > 0) hintPulse
