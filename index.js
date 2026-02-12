@@ -19,9 +19,9 @@ function goConfirm() {
   sessionStorage.setItem("confirmed", "0");
   sessionStorage.setItem("heartDone", "0");
   sessionStorage.setItem("sudokuDone", "0");
+  sessionStorage.setItem("quizDone", "0");
   window.location.href = "confirm.html";
 }
-
 
 yesBtn.addEventListener("click", goConfirm);
 

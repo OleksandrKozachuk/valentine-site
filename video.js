@@ -2,6 +2,7 @@ const C = window.APP_CONFIG;
 
 const heartDone = sessionStorage.getItem("heartDone") === "1";
 const sudokuDone = sessionStorage.getItem("sudokuDone") === "1";
+const quizDone = sessionStorage.getItem("quizDone") === "1";
 
 const gate = document.getElementById("gate");
 const content = document.getElementById("content");
@@ -35,6 +36,14 @@ if (!heartDone) {
       <a class="btn yes" href="sudoku.html" style="display:inline-block; text-decoration:none;">Go to Sudoku</a>
     </div>
   `);
+} else if (!quizDone) {
+  showGate(`
+    One more step 💗<br>
+    Complete the quiz to unlock the video.
+    <div style="margin-top:10px;">
+      <a class="btn yes" href="quiz.html" style="display:inline-block; text-decoration:none;">Go to Quiz</a>
+    </div>
+  `);
 } else {
   gate.hidden = true;
   content.style.display = "flex";
@@ -51,7 +60,6 @@ if (!heartDone) {
        <code>ffmpeg -i input.mp4 -c:v libx264 -crf 26 -preset slow -c:a aac -b:a 128k -movflags +faststart assets/valentine.mp4</code>`;
   });
 
-  // autoplay attempt (may be blocked)
   const p = video.play?.();
   if (p && p.catch) p.catch(() => {});
 }

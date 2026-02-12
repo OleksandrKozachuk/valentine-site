@@ -171,7 +171,9 @@ unlockBtn.addEventListener("click", () => {
   }
   showToast("Unlocked 💗");
   sessionStorage.setItem("sudokuDone", "1");
-  setTimeout(() => (window.location.href = "video.html"), 450);
+  sessionStorage.setItem("quizDone", "0");
+  setTimeout(() => (window.location.href = "quiz.html"), 450);
 });
+
 
 if (heartDone) buildGrid();

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>💗 One last quiz</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="bg-night">
+  <div class="fullscreen">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="top-title">💗 One last quiz</div>
+        <div class="top-subtitle">Answer correctly to unlock the final surprise</div>
+      </div>
+      <a class="btn ghost small" href="index.html">Close</a>
+    </header>
+
+    <div id="gate" class="panel" hidden></div>
+
+    <div id="content" class="panel quiz-wrap" style="flex:1;">
+      <div class="quiz-progress">
+        <span id="qIndex">1</span>/<span id="qTotal">5</span>
+      </div>
+
+      <div id="questionText" class="quiz-question">Question text</div>
+
+      <div id="options" class="quiz-options"></div>
+
+      <div class="quiz-actions">
+        <button id="nextBtn" class="btn yes" type="button" disabled>Next</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="config.js"></script>
+  <script src="quiz.js"></script>
+</body>
+</html>

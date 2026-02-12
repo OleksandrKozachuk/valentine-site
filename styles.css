@@ -305,3 +305,53 @@ h1{
   border:2px solid rgba(255, 120, 160, 0.8);
   background:rgba(255, 120, 160, 0.16);
 }
+/* ---- Quiz ---- */
+.quiz-wrap{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.quiz-progress{
+  opacity:.9;
+  font-weight:900;
+  font-size:14px;
+}
+
+.quiz-question{
+  font-weight:950;
+  font-size:20px;
+  line-height:1.2;
+}
+
+.quiz-options{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.quiz-option{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px;
+  border-radius:16px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  cursor:pointer;
+  user-select:none;
+}
+
+.quiz-option input{
+  width:18px;
+  height:18px;
+  accent-color: #ff7aa2;
+}
+
+.quiz-option span{
+  font-weight:850;
+}
+
+.quiz-actions{
+  margin-top:auto;
+}
