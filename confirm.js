@@ -12,11 +12,11 @@ function showToast(msg) {
   showToast._t = setTimeout(() => toast.classList.remove("show"), 1200);
 }
 
-// Load image with fallback extensions
+// Load image with fallback extensions (silent, but toast if missing entirely)
 let i = 0;
 function tryNext() {
   if (i >= C.confirmCandidates.length) {
-    showToast("Image not found. Add assets/confirm.jpeg (or .jpg/.png)");
+    showToast("Image not found 🙈");
     return;
   }
   img.src = C.confirmCandidates[i++];
@@ -24,7 +24,7 @@ function tryNext() {
 img.onerror = tryNext;
 tryNext();
 
-noBtn.addEventListener("click", () => window.location.href = "index.html");
+noBtn.addEventListener("click", () => (window.location.href = "index.html"));
 yesBtn.addEventListener("click", () => {
   sessionStorage.setItem("confirmed", "1");
   window.location.href = "sky.html";

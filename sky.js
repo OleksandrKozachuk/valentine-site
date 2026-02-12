@@ -6,25 +6,17 @@ const ctx = canvas.getContext("2d");
 const progress = document.getElementById("progress");
 const toast = document.getElementById("toast");
 
-const resetBtn = document.getElementById("resetSky");
-const hintBtn = document.getElementById("hintSky");
-const tapBtn = document.getElementById("tapAssistBtn");
-
 let cssW = 0, cssH = 0, dpr = 1;
 let bgStars = [];
 let heartStars = [];
 let seq = [];
 let pos = 0;
-let hintPulse = 0;
-let tapAssistOn = C.tapAssistDefault;
-
-tapBtn.textContent = `Tap Assist: ${tapAssistOn ? "ON" : "OFF"}`;
 
 function showToast(msg) {
   toast.textContent = msg;
   toast.classList.add("show");
   clearTimeout(showToast._t);
-  showToast._t = setTimeout(() => toast.classList.remove("show"), 1100);
+  showToast._t = setTimeout(() => toast.classList.remove("show"), 900);
 }
 
 function xmur3(str) {
@@ -105,7 +97,6 @@ function buildSky() {
   seq.push(0); // close heart
 
   pos = 0;
-  hintPulse = 0;
   updateProgress();
 }
 
@@ -153,12 +144,14 @@ function draw() {
     ctx.restore();
   }
 
+  // stars
   const nextIdx = seq[Math.min(pos, seq.length - 1)];
   const pulse = 0.6 + 0.4 * Math.sin(now / 220);
 
   for (let i = 0; i < heartStars.length; i++) {
     const s = heartStars[i];
     const isNext = (i === nextIdx) && (pos < seq.length);
+
     const coreR = Math.max(5, Math.min(8, cssW / 140));
     const haloR = isNext ? coreR * 3.2 : coreR * 2.6;
 
@@ -176,10 +169,6 @@ function draw() {
     ctx.arc(s.x, s.y, haloR, 0, Math.PI * 2);
     ctx.stroke();
     ctx.restore();
-  }
-
-  if (hintPulse > 0 && pos < seq.length) {
-    hintPulse = Math.max(0, hintPulse - 0.03);
   }
 }
 
@@ -210,8 +199,7 @@ canvas.addEventListener("pointerdown", (evt) => {
   const y = evt.clientY - rect.top;
 
   const target = seq[pos];
-  const radius = tapAssistOn ? C.tapAssistRadius : 18;
-  const hit = nearestStar(x, y, radius);
+  const hit = nearestStar(x, y, C.tapAssistRadius); // always forgiving
 
   if (hit !== target) {
     showToast("Tap the glowing star ✨");
@@ -224,22 +212,6 @@ canvas.addEventListener("pointerdown", (evt) => {
   else showToast("✨");
 }, { passive: false });
 
-resetBtn.addEventListener("click", () => {
-  pos = 0;
-  updateProgress();
-  showToast("Reset ✨");
-});
-
-hintBtn.addEventListener("click", () => {
-  showToast("Look for the glow ✨");
-  hintPulse = 1;
-});
-
-tapBtn.addEventListener("click", () => {
-  tapAssistOn = !tapAssistOn;
-  tapBtn.textContent = `Tap Assist: ${tapAssistOn ? "ON" : "OFF"}`;
-});
-
 function init() {
   const attempt = () => {
     if (!resizeCanvas()) return requestAnimationFrame(attempt);
@@ -249,7 +221,6 @@ function init() {
 }
 init();
 
-// keep sizing correct
 new ResizeObserver(() => {
   if (!resizeCanvas()) return;
   buildSky();

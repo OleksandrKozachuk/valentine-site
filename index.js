@@ -29,17 +29,67 @@ let revertTimer = null;
 
 function rand(min, max) { return Math.random() * (max - min) + min; }
 
-function moveNoButton() {
+function rectsIntersect(a, b, pad = 0) {
+  return !(
+    a.right + pad < b.left ||
+    a.left - pad > b.right ||
+    a.bottom + pad < b.top ||
+    a.top - pad > b.bottom
+  );
+}
+
+function moveNoButtonNoOverlap() {
   const areaRect = btnArea.getBoundingClientRect();
-  const btnRect = noBtn.getBoundingClientRect();
+
+  // Measure current sizes
+  const yesRect = yesBtn.getBoundingClientRect();
+  const noRect = noBtn.getBoundingClientRect();
+
+  // Make No absolute so we can move inside area
   noBtn.style.position = "absolute";
 
-  const padding = 10;
-  const maxLeft = Math.max(padding, areaRect.width - btnRect.width - padding);
-  const maxTop  = Math.max(padding, areaRect.height - btnRect.height - padding);
+  const padding = 10;        // keep within the box edges
+  const gap = 12;            // minimum distance from Yes (no overlap + small gap)
 
-  noBtn.style.left = `${rand(padding, maxLeft)}px`;
-  noBtn.style.top  = `${rand(padding, maxTop)}px`;
+  const maxLeft = Math.max(padding, areaRect.width - noRect.width - padding);
+  const maxTop  = Math.max(padding, areaRect.height - noRect.height - padding);
+
+  // Convert Yes rect to btnArea-local coordinates
+  const yesLocal = {
+    left: yesRect.left - areaRect.left,
+    top: yesRect.top - areaRect.top,
+    right: yesRect.right - areaRect.left,
+    bottom: yesRect.bottom - areaRect.top
+  };
+
+  // Try multiple random placements until one doesn't intersect Yes
+  let placed = false;
+  for (let i = 0; i < 40; i++) {
+    const left = rand(padding, maxLeft);
+    const top  = rand(padding, maxTop);
+
+    const noLocal = {
+      left,
+      top,
+      right: left + noRect.width,
+      bottom: top + noRect.height
+    };
+
+    if (!rectsIntersect(noLocal, yesLocal, gap)) {
+      noBtn.style.left = `${left}px`;
+      noBtn.style.top  = `${top}px`;
+      placed = true;
+      break;
+    }
+  }
+
+  // Fallback: if we couldn't find a safe random spot, push it away horizontally
+  if (!placed) {
+    const left = Math.min(maxLeft, Math.max(padding, yesLocal.right + gap));
+    const top = rand(padding, maxTop);
+    noBtn.style.left = `${left}px`;
+    noBtn.style.top  = `${top}px`;
+  }
 }
 
 function resetNo() {
@@ -59,7 +109,6 @@ function convertToYes() {
   noBtn.classList.add("yes");
   noBtn.textContent = "Yes 💞";
 
-  // revert after 1 minute back to Yes+No
   clearTimeout(revertTimer);
   revertTimer = setTimeout(() => {
     resetNo();
@@ -73,7 +122,7 @@ function handleNoAttempt(e) {
   e.stopPropagation();
 
   attempts += 1;
-  moveNoButton();
+  moveNoButtonNoOverlap();
 
   if (attempts % 3 === 0) {
     const idx = Math.min(C.messages.length - 1, (attempts / 3) - 1);
@@ -90,10 +139,18 @@ noBtn.addEventListener("pointerdown", handleNoAttempt, { passive: false });
 
 noBtn.addEventListener("click", (e) => {
   if (!converted) {
-    // pointerdown already handled; prevent weird click behavior
     e.preventDefault();
     e.stopPropagation();
     return;
   }
   goConfirm();
+});
+
+// Keep No sane on resize
+window.addEventListener("resize", () => {
+  if (!converted) {
+    noBtn.style.position = "relative";
+    noBtn.style.left = "auto";
+    noBtn.style.top = "auto";
+  }
 });
