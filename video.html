@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>🥰 Unlocked</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="bg-night">
+  <div class="fullscreen">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="top-title">🥰 Unlocked</div>
+        <div class="top-subtitle">Happy Valentine’s Day ❤️</div>
+      </div>
+      <a class="btn ghost small" href="index.html">Close</a>
+    </header>
+
+    <div id="gate" class="panel" hidden>
+      This page is locked 💗<br />
+      Please complete the constellation first.
+      <div style="margin-top:10px;">
+        <a class="btn yes" href="sky.html" style="display:inline-block; text-decoration:none;">Go to the sky</a>
+      </div>
+    </div>
+
+    <div id="content" class="panel" style="flex:1; display:flex; flex-direction:column; gap:12px;">
+      <div id="sweetMsg" style="white-space:pre-line; font-weight:800;"></div>
+
+      <div id="videoError" class="video-error" hidden></div>
+
+      <video id="video" class="video" controls playsinline preload="metadata">
+        <source id="videoSrc" type="video/mp4" />
+        Sorry — your browser can’t play this video.
+      </video>
+
+      <div style="opacity:.85; font-size:13px;">
+        Video file: <code>assets/valentine.mp4</code>
+      </div>
+
+      <div class="bottombar">
+        <a class="btn ghost" href="sky.html" style="text-decoration:none; text-align:center;">Back to sky</a>
+        <a class="btn ghost" href="index.html" style="text-decoration:none; text-align:center;">Start over</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="video.js"></script>
+</body>
+</html>

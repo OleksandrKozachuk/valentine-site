@@ -6,8 +6,8 @@
   <title>❤️ Valentine</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
-  <main class="page">
+<body class="bg-romance">
+  <div class="container">
     <section class="card">
       <div class="badge">💘 Valentine’s Prompt</div>
 
@@ -25,104 +25,11 @@
 
       <p class="hint">(Try clicking “No”… if you can 😄)</p>
     </section>
-
-    <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  </main>
-
-  <!-- FULLSCREEN OVERLAY -->
-  <div id="overlay" class="overlay" aria-hidden="true">
-
-    <!-- CONFIRM SCREEN -->
-    <section id="confirmScreen" class="screen confirm-screen" aria-label="Confirmation screen">
-      <header class="topbar">
-        <div class="topbar-left">
-          <div class="top-title">💗 Are you sure?</div>
-          <div class="top-subtitle">This is a very serious question 😌</div>
-        </div>
-        <button id="closeOverlay" class="btn ghost small" type="button">Close</button>
-      </header>
-
-      <div class="confirm-body">
-        <img
-          id="confirmImg"
-          class="confirm-img"
-          src="assets/confirm.jpeg"
-          alt="A cute photo"
-          loading="eager"
-        />
-
-        <div class="confirm-text">
-          <p class="confirm-title">Are you REALLY sure? 🥺</p>
-          <p class="confirm-subtitle">If you say yes… there’s a surprise waiting.</p>
-        </div>
-
-        <div class="confirm-actions">
-          <button id="confirmNo" class="btn ghost" type="button">No 🙈</button>
-          <button id="confirmYes" class="btn yes" type="button">Yes 💞</button>
-        </div>
-
-        <p class="confirm-note">
-          Put your image in <code>assets/</code> as: <code>confirm.jpg</code> or <code>confirm.jpeg</code> or <code>confirm.png</code>
-        </p>
-      </div>
-    </section>
-
-    <!-- SKY SCREEN -->
-    <section id="skyScreen" class="screen sky-screen" hidden aria-label="Constellation screen">
-      <header class="topbar">
-        <div class="topbar-left">
-          <div class="top-title">✨ Constellation of Us</div>
-          <div id="progress" class="top-subtitle">Tap the glowing star</div>
-        </div>
-        <button id="closeSky" class="btn ghost small" type="button">Close</button>
-      </header>
-
-      <div class="instructions">
-        Connect the stars in order to draw a <b>closed</b> heart 💗<br />
-        <span class="muted">Last step: tap the <b>first</b> star again to close it.</span>
-      </div>
-
-      <div id="canvasWrap" class="canvas-wrap">
-        <canvas id="skyCanvas" class="sky-canvas" aria-label="Night sky constellation"></canvas>
-      </div>
-
-      <footer class="bottombar">
-        <button id="resetSky" class="btn ghost" type="button">Reset</button>
-        <button id="hintSky" class="btn ghost" type="button">Hint</button>
-        <button id="tapAssistBtn" class="btn ghost" type="button">Tap Assist: ON</button>
-      </footer>
-    </section>
-
-    <!-- VIDEO SCREEN (ONLY AFTER HEART COMPLETE) -->
-    <section id="videoScreen" class="screen video-screen" hidden aria-label="Video screen">
-      <header class="topbar">
-        <div class="topbar-left">
-          <div class="top-title">🥰 Unlocked</div>
-          <div class="top-subtitle">Happy Valentine’s Day ❤️</div>
-        </div>
-        <button id="closeVideo" class="btn ghost small" type="button">Close</button>
-      </header>
-
-      <div class="video-content">
-        <p id="sweetMsg" class="sweet-msg">
-          Happy Valentine’s Day ❤️ I’m so lucky to have you.
-        </p>
-
-        <div id="videoErrorBox" class="video-error" hidden></div>
-
-        <video id="valentineVideo" class="video" controls playsinline preload="metadata">
-          <source src="assets/valentine.mp4" type="video/mp4" />
-          Sorry — your browser can’t play this video.
-        </video>
-
-        <p class="video-note">Put your video at <code>assets/valentine.mp4</code></p>
-
-        <button id="restart" class="btn ghost" type="button">Restart 💫</button>
-      </div>
-    </section>
-
   </div>
 
-  <script src="script.js"></script>
+  <div id="toast" class="toast"></div>
+
+  <script src="config.js"></script>
+  <script src="index.js"></script>
 </body>
 </html>

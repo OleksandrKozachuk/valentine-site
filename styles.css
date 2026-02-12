@@ -17,6 +17,11 @@ body{
   font-family:var(--font);
   color:var(--text);
   min-height:100svh;
+}
+
+a{ color: inherit; }
+
+.bg-romance{
   display:grid;
   place-items:center;
   background:
@@ -25,9 +30,18 @@ body{
     linear-gradient(180deg, #fff, #ffe6ef);
 }
 
-body.modal-open{ overflow:hidden; }
+.bg-night{
+  background:
+    radial-gradient(1200px 900px at 20% 10%, rgba(255,255,255,.10), transparent 65%),
+    radial-gradient(1200px 900px at 80% 30%, rgba(255,255,255,.08), transparent 65%),
+    linear-gradient(180deg, rgba(16,10,20,.98), rgba(10,12,22,.98));
+  color:#fff;
+}
 
-.page{ width:min(920px, 92vw); padding:24px 0; }
+.container{
+  width:min(920px, 92vw);
+  padding:24px 0;
+}
 
 .card{
   background:var(--card);
@@ -98,8 +112,6 @@ h1{
   color:white;
   box-shadow: 0 12px 30px rgba(255,63,122,.35);
 }
-.btn.yes:hover{ transform: translateY(-1px) scale(1.01); }
-.btn.yes:active{ transform: translateY(1px) scale(.99); }
 
 .btn.no{
   background:rgba(255,255,255,.88);
@@ -137,26 +149,18 @@ h1{
 }
 .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 
-/* overlay */
-.overlay{ position:fixed; inset:0; display:none; z-index:60; }
-.overlay.show{ display:block; }
-
-/* screens */
-.screen{
-  position:absolute;
-  inset:0;
-  display:flex;
-  flex-direction:column;
-
-  /* important: support both */
-  height:100vh;
-  height:100dvh;
-
+/* Fullscreen screens (confirm/sky/video pages) */
+.fullscreen{
+  min-height:100vh;
+  min-height:100dvh;
   padding:
     calc(14px + env(safe-area-inset-top))
     calc(14px + env(safe-area-inset-right))
     calc(14px + env(safe-area-inset-bottom))
     calc(14px + env(safe-area-inset-left));
+  display:flex;
+  flex-direction:column;
+  gap:12px;
 }
 
 .topbar{
@@ -170,30 +174,29 @@ h1{
   border:1px solid rgba(255,255,255,.12);
   backdrop-filter: blur(8px);
 }
-.topbar-left{ display:flex; flex-direction:column; gap:2px; }
-.top-title{ font-weight:950; letter-spacing:.2px; color:#fff; }
-.top-subtitle{ opacity:.85; font-size:13px; color:#fff; }
 
-/* confirm */
-.confirm-screen{
-  background:
-    radial-gradient(1200px 900px at 20% 10%, rgba(255,255,255,.10), transparent 65%),
-    radial-gradient(1200px 900px at 80% 30%, rgba(255,255,255,.08), transparent 65%),
-    linear-gradient(180deg, rgba(16,10,20,.98), rgba(10,12,22,.98));
-  color:#fff;
+.topbar-left{ display:flex; flex-direction:column; gap:2px; }
+.top-title{ font-weight:950; letter-spacing:.2px; }
+.top-subtitle{ opacity:.85; font-size:13px; }
+
+.panel{
+  border-radius:18px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  padding:12px;
 }
 
-.confirm-body{
-  margin-top:12px;
-  flex:1;
+/* confirm page */
+.confirm-wrap{
   display:flex;
   flex-direction:column;
-  gap:12px;
   align-items:center;
+  gap:12px;
+  flex:1;
 }
 
 .confirm-img{
-  width:min(520px, 96%);
+  width:min(560px, 96vw);
   aspect-ratio: 4/3;
   object-fit: cover;
   border-radius:18px;
@@ -201,42 +204,21 @@ h1{
   background:rgba(0,0,0,.2);
 }
 
-.confirm-text{ width:min(520px, 96%); text-align:center; }
-.confirm-title{ margin:0; font-size: clamp(20px, 3vw, 26px); font-weight:950; }
-.confirm-subtitle{ margin:8px 0 0; opacity:.9; line-height:1.4; }
-
 .confirm-actions{
-  width:min(520px, 96%);
+  width:min(560px, 96vw);
   display:flex;
   gap:10px;
 }
 .confirm-actions .btn{ flex:1; }
-.confirm-note{ margin:0; opacity:.8; font-size:13px; }
 
-/* sky */
-.sky-screen{
-  background:
-    radial-gradient(1200px 800px at 18% 12%, rgba(255,255,255,.10), transparent 65%),
-    radial-gradient(1200px 800px at 82% 28%, rgba(255,255,255,.07), transparent 65%),
-    linear-gradient(180deg, rgba(10,12,22,.98), rgba(24,12,26,.98));
-  color:#fff;
+@media (max-width:520px){
+  .confirm-actions{ flex-direction:column; }
 }
 
-.instructions{
-  margin-top:12px;
-  padding:12px;
-  border-radius:16px;
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.10);
-  line-height:1.35;
-}
-.instructions .muted{ opacity:.8; font-size:13px; }
-
-/* IMPORTANT: canvas wrapper must have real height */
+/* sky page */
 .canvas-wrap{
   flex:1 1 auto;
-  min-height: 220px; /* fallback so it NEVER becomes 0 */
-  margin-top:12px;
+  min-height: 280px;
   border-radius:18px;
   overflow:hidden;
   border:1px solid rgba(255,255,255,.14);
@@ -244,7 +226,6 @@ h1{
   position:relative;
 }
 
-/* IMPORTANT: force canvas to fill wrapper reliably */
 .sky-canvas{
   position:absolute;
   inset:0;
@@ -257,7 +238,6 @@ h1{
 .bottombar{
   display:flex;
   gap:10px;
-  margin-top:12px;
   flex-wrap:wrap;
 }
 .bottombar .btn{ flex:1; min-width:120px; }
@@ -265,37 +245,9 @@ h1{
 @media (max-width:520px){
   .bottombar{ flex-direction:column; }
   .bottombar .btn{ width:100%; }
-  .confirm-actions{ flex-direction:column; }
 }
 
-/* video */
-.video-screen{
-  background:
-    radial-gradient(1200px 900px at 20% 10%, rgba(255,255,255,.10), transparent 65%),
-    radial-gradient(1200px 900px at 80% 30%, rgba(255,255,255,.08), transparent 65%),
-    linear-gradient(180deg, rgba(16,10,20,.98), rgba(10,12,22,.98));
-  color:#fff;
-}
-
-.video-content{
-  margin-top:14px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  flex:1;
-}
-
-.sweet-msg{
-  margin:0;
-  font-size: clamp(16px, 2vw, 19px);
-  line-height:1.5;
-  white-space:pre-line;
-  padding:12px;
-  border-radius:16px;
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.10);
-}
-
+/* video page */
 .video{
   width:100%;
   max-height: 58dvh;
@@ -303,8 +255,6 @@ h1{
   border:1px solid rgba(255,255,255,.14);
   background:#000;
 }
-
-.video-note{ margin:0; opacity:.8; font-size:13px; }
 
 .video-error{
   padding:12px;

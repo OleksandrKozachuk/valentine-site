@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Are you sure? 💗</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="bg-night">
+  <div class="fullscreen">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="top-title">💗 Are you sure?</div>
+        <div class="top-subtitle">This is a very serious question 😌</div>
+      </div>
+      <a class="btn ghost small" href="index.html">Back</a>
+    </header>
+
+    <div class="confirm-wrap">
+      <img id="confirmImg" class="confirm-img" alt="Your image" />
+      <div class="panel" style="width:min(560px,96vw); text-align:center;">
+        <div style="font-weight:950; font-size:20px;">Are you REALLY sure? 🥺</div>
+        <div style="opacity:.9; margin-top:6px;">If you say yes… there’s a surprise waiting.</div>
+      </div>
+
+      <div class="confirm-actions">
+        <button id="noBtn" class="btn ghost" type="button">No 🙈</button>
+        <button id="yesBtn" class="btn yes" type="button">Yes 💞</button>
+      </div>
+
+      <div class="panel" style="width:min(560px,96vw); font-size:13px; opacity:.9;">
+        Put your image in <code>assets/</code> as <code>confirm.jpeg</code> (or jpg/png/webp).
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="config.js"></script>
+  <script src="confirm.js"></script>
+</body>
+</html>

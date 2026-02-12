@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>✨ Constellation</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="bg-night">
+  <div class="fullscreen">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="top-title">✨ Constellation of Us</div>
+        <div id="progress" class="top-subtitle">Loading…</div>
+      </div>
+      <a class="btn ghost small" href="index.html">Close</a>
+    </header>
+
+    <div class="panel">
+      Connect the stars in order to draw a <b>closed</b> heart 💗
+      <div style="opacity:.85; font-size:13px; margin-top:4px;">
+        Last step: tap the <b>first</b> star again to close it.
+      </div>
+    </div>
+
+    <div id="canvasWrap" class="canvas-wrap">
+      <canvas id="skyCanvas" class="sky-canvas"></canvas>
+    </div>
+
+    <footer class="bottombar">
+      <button id="resetSky" class="btn ghost" type="button">Reset</button>
+      <button id="hintSky" class="btn ghost" type="button">Hint</button>
+      <button id="tapAssistBtn" class="btn ghost" type="button">Tap Assist: ON</button>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="config.js"></script>
+  <script src="sky.js"></script>
+</body>
+</html>
