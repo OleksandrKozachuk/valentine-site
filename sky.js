@@ -185,9 +185,10 @@ function nearestStar(x, y, radius) {
 }
 
 function complete() {
-  sessionStorage.setItem("unlocked", "1");
+  sessionStorage.setItem("heartDone", "1");
+  sessionStorage.setItem("sudokuDone", "0");
   showToast("Heart completed 💗");
-  setTimeout(() => (window.location.href = "video.html"), 350);
+  setTimeout(() => (window.location.href = "sudoku.html"), 350);
 }
 
 canvas.addEventListener("pointerdown", (evt) => {

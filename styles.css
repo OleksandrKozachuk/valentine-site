@@ -264,3 +264,44 @@ h1{
   line-height:1.4;
   font-size:14px;
 }
+
+/* ---- Sudoku ---- */
+.sudoku-grid{
+  width:min(360px, 92vw);
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:8px;
+}
+
+.sudoku-cell{
+  border:1px solid rgba(255,255,255,.20);
+  border-radius:14px;
+  background:rgba(255,255,255,.06);
+  padding:6px;
+}
+
+.sudoku-input{
+  width:100%;
+  aspect-ratio: 1 / 1;
+  border:0;
+  outline:none;
+  border-radius:10px;
+  text-align:center;
+  font-size:24px;
+  font-weight:950;
+  color:#fff;
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(255,255,255,.12);
+}
+
+.sudoku-input.given{
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.18);
+  color:#fff;
+  opacity:.95;
+}
+
+.sudoku-input.wrong{
+  border:2px solid rgba(255, 120, 160, 0.8);
+  background:rgba(255, 120, 160, 0.16);
+}

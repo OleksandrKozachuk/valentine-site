@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>🧩 One more thing</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="bg-night">
+  <div class="fullscreen">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="top-title">🧩 One more thing</div>
+        <div class="top-subtitle">Solve this tiny Sudoku to unlock the surprise 💗</div>
+      </div>
+      <a class="btn ghost small" href="index.html">Close</a>
+    </header>
+
+    <div id="gate" class="panel" hidden>
+      This page is locked 💗<br />
+      Please complete the constellation first.
+      <div style="margin-top:10px;">
+        <a class="btn yes" href="sky.html" style="display:inline-block; text-decoration:none;">Go to the sky</a>
+      </div>
+    </div>
+
+    <div id="content" class="panel" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:12px;">
+      <div id="sudokuGrid" class="sudoku-grid" aria-label="Mini sudoku"></div>
+
+      <div style="display:flex; gap:10px; width:min(360px,92vw);">
+        <button id="clearBtn" class="btn ghost" type="button" style="flex:1;">Clear</button>
+        <button id="unlockBtn" class="btn yes" type="button" style="flex:1;" disabled>Unlock 💖</button>
+      </div>
+
+      <div style="opacity:.85; font-size:13px; text-align:center;">
+        Rules: fill 1–4. Each row, column, and 2×2 box must contain all numbers.
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="config.js"></script>
+  <script src="sudoku.js"></script>
+</body>
+</html>
