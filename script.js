@@ -1,19 +1,12 @@
 // ========= Customize these =========
 const CONFIG = {
-  herName: "my love", // e.g. "Sofia"
-  sweetMessage:
-    "Happy Valentine’s Day ❤️\nYou’re my favorite person.\n\nPress play 😘",
-
-  // No->Yes becomes two Yes buttons; revert after 1 minute:
+  herName: "my love",
+  sweetMessage: "Happy Valentine’s Day ❤️\nYou’re my favorite person.\n\nPress play 😘",
   revertAfterMs: 60000,
 
-  // Sky personalization: change to something meaningful (date / inside joke)
   skySeed: "our-valentine-2026",
-
-  // Heart stars (unique points); last step is clicking the first star again to close
   heartStarCount: 10,
 
-  // Phone-friendly snapping:
   tapAssistDefault: true,
   tapAssistRadius: 36,
 };
@@ -27,7 +20,6 @@ const el = {
   toast: document.getElementById("toast"),
 
   overlay: document.getElementById("overlay"),
-
   confirmScreen: document.getElementById("confirmScreen"),
   skyScreen: document.getElementById("skyScreen"),
   videoScreen: document.getElementById("videoScreen"),
@@ -48,6 +40,7 @@ const el = {
 
   sweetMsg: document.getElementById("sweetMsg"),
   video: document.getElementById("valentineVideo"),
+  videoErrorBox: document.getElementById("videoErrorBox"),
 };
 
 el.name.textContent = CONFIG.herName;
@@ -79,26 +72,72 @@ function showScreen(which) {
   el.videoScreen.hidden = which !== "video";
 }
 
-// Close everything + reset video
-function closeAll() {
-  overlayOff();
-  showScreen("confirm");
-  stopVideo();
-  // Reset sky state so next open is clean
-  resetConstellation();
+// ---------- Video helpers ----------
+function clearVideoError() {
+  el.videoErrorBox.hidden = true;
+  el.videoErrorBox.textContent = "";
+}
+
+function showVideoError(msg) {
+  el.videoErrorBox.hidden = false;
+  el.videoErrorBox.innerHTML = msg;
 }
 
 function stopVideo() {
   if (!el.video) return;
-  el.video.pause();
-  try { el.video.currentTime = 0; } catch (err) {}
+  try { el.video.pause(); } catch {}
+  try { el.video.currentTime = 0; } catch {}
+}
+
+function loadAndPlayVideo() {
+  if (!el.video) return;
+  clearVideoError();
+
+  // Force reload sources when switching screens
+  try { el.video.load(); } catch {}
+
+  const p = el.video.play?.();
+  if (p && typeof p.catch === "function") p.catch(() => {});
+}
+
+// Handle decode/load errors with a useful explanation
+if (el.video) {
+  el.video.addEventListener("error", () => {
+    // If path is wrong, el.video.error is often set too.
+    // Safari/Chrome both show "no supported format..." for codec or wrong file sometimes.
+    const hint =
+      `⚠️ I couldn’t play the video.<br><br>
+       <b>Check 1:</b> Make sure the file exists exactly at <code>assets/valentine.mp4</code> (case-sensitive on GitHub).<br>
+       <b>Check 2:</b> Your MP4 must be H.264 + AAC (some iPhone videos are HEVC/H.265 and won’t play in some browsers).<br><br>
+       <b>Fix (recommended):</b> Re-encode with ffmpeg:<br>
+       <code>ffmpeg -i input.mp4 -c:v libx264 -crf 26 -preset slow -c:a aac -b:a 128k -movflags +faststart assets/valentine.mp4</code>`;
+    showVideoError(hint);
+  });
+}
+
+// ---------- Close / reset all ----------
+function resetConstellationStateOnly() {
+  clickedSeqPos = 0;
+  hintPulse = 0;
+  skyReady = false;
+  bgStars = [];
+  heartStars = [];
+  seq = [];
+  updateProgressText(); // safe even if seq empty
+}
+
+function closeAll() {
+  overlayOff();
+  showScreen("confirm");
+  stopVideo();
+  clearVideoError();
+  resetConstellationStateOnly();
 }
 
 // ---------- No button dodge logic ----------
 let noAttempts = 0;
 let noIsConverted = false;
 let revertTimer = null;
-const supportsPointerEvents = "PointerEvent" in window;
 
 const messages = [
   "Not today",
@@ -133,7 +172,6 @@ function setNoAsNo() {
   el.noBtn.classList.remove("yes");
   el.noBtn.classList.add("no");
   el.noBtn.textContent = "No 🙈";
-
   el.noBtn.style.position = "relative";
   el.noBtn.style.left = "auto";
   el.noBtn.style.top = "auto";
@@ -144,7 +182,6 @@ function setNoAsYes() {
   el.noBtn.classList.remove("no");
   el.noBtn.classList.add("yes");
   el.noBtn.textContent = "Yes 💞";
-
   el.noBtn.style.position = "relative";
   el.noBtn.style.left = "auto";
   el.noBtn.style.top = "auto";
@@ -163,7 +200,6 @@ function handleNoAttempt(e) {
   e.stopPropagation();
 
   noAttempts += 1;
-
   moveNoButton();
 
   if (noAttempts % 3 === 0) {
@@ -177,26 +213,26 @@ function handleNoAttempt(e) {
   }
 }
 
-// (No hover dodge; you asked dodge on click intention)
+// Dodge when user tries to tap/click it
 el.noBtn.addEventListener("pointerdown", handleNoAttempt, { passive: false });
 
-// If converted to YES, clicking it should act like YES
+// If converted to YES, clicking it acts like YES flow
 el.noBtn.addEventListener("click", (e) => {
   if (!noIsConverted) {
-    // Pointer input already hits pointerdown; keep click for keyboard fallback only.
-    if (supportsPointerEvents && e.detail > 0) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-    handleNoAttempt(e);
-  } else {
-    startConfirmFlow();
+    // pointerdown already handled real clicks/taps
+    e.preventDefault();
+    e.stopPropagation();
+    return;
   }
+  startConfirmFlow();
 });
 
 // ---------- YES flow: Confirm -> Sky -> Video ----------
 function startConfirmFlow() {
+  stopVideo();
+  clearVideoError();
+  resetConstellationStateOnly();
+
   overlayOn();
   showScreen("confirm");
   showToast("One more question… 😌");
@@ -204,7 +240,6 @@ function startConfirmFlow() {
 
 el.yesBtn.addEventListener("click", startConfirmFlow);
 
-// Confirm buttons
 el.confirmNo.addEventListener("click", () => {
   showToast("Okay 🙂");
   closeAll();
@@ -213,30 +248,22 @@ el.confirmNo.addEventListener("click", () => {
 el.confirmYes.addEventListener("click", () => {
   showScreen("sky");
 
-  // CRITICAL: wait for the screen to be visible before measuring canvas on phones
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      resetConstellation();
-      showToast("Tap the glowing star ✨");
-    });
-  });
+  // IMPORTANT: wait for layout so canvas isn't 0x0 on phones
+  ensureSkyReady();
+  showToast("Tap the glowing star ✨");
 });
 
-// Close buttons
 el.closeOverlay.addEventListener("click", closeAll);
 el.closeSky.addEventListener("click", closeAll);
 el.closeVideo.addEventListener("click", closeAll);
 
-// Restart (from video screen)
 el.restart.addEventListener("click", () => {
   stopVideo();
+  clearVideoError();
   showScreen("sky");
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      resetConstellation();
-      showToast("Let’s do it again ✨");
-    });
-  });
+  resetConstellationStateOnly();
+  ensureSkyReady();
+  showToast("Let’s do it again ✨");
 });
 
 // ---------- Constellation (Canvas) ----------
@@ -245,10 +272,11 @@ const ctx = el.canvas.getContext("2d");
 let cssW = 0, cssH = 0, dpr = 1;
 let bgStars = [];
 let heartStars = [];
-let seq = [];               // order includes 0 at end to close the heart
-let clickedSeqPos = 0;      // progress
+let seq = [];
+let clickedSeqPos = 0;
 let hintPulse = 0;
 let tapAssistOn = CONFIG.tapAssistDefault;
+let skyReady = false;
 
 el.tapAssistBtn.textContent = `Tap Assist: ${tapAssistOn ? "ON" : "OFF"}`;
 
@@ -276,12 +304,12 @@ function mulberry32(a) {
 
 function resizeCanvasToCSS() {
   const rect = el.canvas.getBoundingClientRect();
-  cssW = Math.max(1, rect.width);
-  cssH = Math.max(1, rect.height);
+  cssW = Math.max(0, rect.width);
+  cssH = Math.max(0, rect.height);
 
   dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-  el.canvas.width = Math.floor(cssW * dpr);
-  el.canvas.height = Math.floor(cssH * dpr);
+  el.canvas.width = Math.max(1, Math.floor(cssW * dpr));
+  el.canvas.height = Math.max(1, Math.floor(cssH * dpr));
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
@@ -336,35 +364,53 @@ function generateSky() {
 }
 
 function updateProgressText() {
-  const total = seq.length;
+  const total = seq.length || 1;
   const step = Math.min(total, clickedSeqPos + 1);
   el.progress.textContent = `Tap the glowing star (${step}/${total})`;
 }
 
-function resetConstellation() {
-  if (el.skyScreen.hidden) return;
-
+function prepareConstellation() {
   resizeCanvasToCSS();
-  generateSky();
+
+  // If still 0-sized (mobile layout not ready), retry next frame
+  if (cssW < 20 || cssH < 20) {
+    skyReady = false;
+    return false;
+  }
+
   clickedSeqPos = 0;
   hintPulse = 0;
+
+  generateSky();
   updateProgressText();
+  skyReady = true;
   drawSky();
+  return true;
+}
+
+// Keeps retrying until the canvas has a real size on mobile
+function ensureSkyReady() {
+  requestAnimationFrame(() => {
+    // must be visible
+    if (el.skyScreen.hidden) return;
+
+    const ok = prepareConstellation();
+    if (!ok) ensureSkyReady();
+  });
 }
 
 function drawSky() {
-  ctx.clearRect(0, 0, cssW, cssH);
+  if (!skyReady) return;
 
+  ctx.clearRect(0, 0, cssW, cssH);
   const now = performance.now();
 
-  // soft glow
   const bg = ctx.createRadialGradient(cssW * 0.2, cssH * 0.15, 10, cssW * 0.5, cssH * 0.6, Math.max(cssW, cssH));
   bg.addColorStop(0, "rgba(255,255,255,0.10)");
   bg.addColorStop(1, "rgba(0,0,0,0.35)");
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, cssW, cssH);
 
-  // stars twinkle
   for (const s of bgStars) {
     const tw = 0.6 + 0.4 * Math.sin((now + s.tw) / 700);
     ctx.beginPath();
@@ -373,7 +419,6 @@ function drawSky() {
     ctx.fill();
   }
 
-  // lines
   if (clickedSeqPos > 1) {
     ctx.save();
     ctx.lineWidth = Math.max(2, Math.min(4, cssW / 240));
@@ -396,7 +441,6 @@ function drawSky() {
   const nextIdx = seq[Math.min(clickedSeqPos, seq.length - 1)];
   const pulse = 0.6 + 0.4 * Math.sin(now / 220);
 
-  // heart stars
   for (let i = 0; i < heartStars.length; i++) {
     const s = heartStars[i];
 
@@ -429,7 +473,6 @@ function drawSky() {
     ctx.restore();
   }
 
-  // hint sparkle
   if (hintPulse > 0 && clickedSeqPos < seq.length) {
     const s = heartStars[nextIdx];
     const a = Math.min(1, hintPulse);
@@ -459,22 +502,13 @@ function findNearestStar(x, y, radius) {
 
 function completeHeart() {
   showToast("Heart completed 💗");
-  // Switch to video view ONLY now:
   showScreen("video");
-  // attempt to play
-  playVideoSafely();
-}
-
-function playVideoSafely() {
-  if (!el.video || typeof el.video.play !== "function") return;
-  const playPromise = el.video.play();
-  if (playPromise && typeof playPromise.catch === "function") {
-    playPromise.catch(() => {});
-  }
+  loadAndPlayVideo();
 }
 
 function onCanvasPointerDown(evt) {
   evt.preventDefault();
+  if (!skyReady) return;
   if (clickedSeqPos >= seq.length) return;
 
   const rect = el.canvas.getBoundingClientRect();
@@ -482,7 +516,6 @@ function onCanvasPointerDown(evt) {
   const y = (evt.clientY - rect.top);
 
   const nextIdx = seq[clickedSeqPos];
-
   const radius = tapAssistOn ? CONFIG.tapAssistRadius : 18;
   const hit = findNearestStar(x, y, radius);
 
@@ -502,14 +535,14 @@ function onCanvasPointerDown(evt) {
   updateProgressText();
 
   if (clickedSeqPos >= seq.length) {
-    setTimeout(completeHeart, 350);
+    setTimeout(completeHeart, 250);
   } else {
     showToast("✨");
   }
 }
 
 function animate() {
-  if (!el.skyScreen.hidden) {
+  if (!el.skyScreen.hidden && skyReady) {
     if (hintPulse > 0) hintPulse = Math.max(0, hintPulse - 0.03);
     drawSky();
   }
@@ -518,7 +551,8 @@ function animate() {
 
 // Controls
 el.resetSky.addEventListener("click", () => {
-  resetConstellation();
+  resetConstellationStateOnly();
+  ensureSkyReady();
   showToast("Reset ✨");
 });
 el.hintSky.addEventListener("click", () => {
@@ -531,20 +565,14 @@ el.tapAssistBtn.addEventListener("click", () => {
   showToast(tapAssistOn ? "Tap Assist enabled ✅" : "Tap Assist disabled");
 });
 
-// Canvas events
 el.canvas.addEventListener("pointerdown", onCanvasPointerDown, { passive: false });
 
-// Mobile resizing: keep canvas correct even when address bar changes size
+// Resizing (including mobile address bar changes)
 function handleViewportResize() {
   if (!el.overlay.classList.contains("show")) return;
   if (el.skyScreen.hidden) return;
-  // wait a frame then resize
-  requestAnimationFrame(() => {
-    resizeCanvasToCSS();
-    drawSky();
-  });
+  ensureSkyReady();
 }
-
 window.addEventListener("resize", handleViewportResize);
 if (window.visualViewport) {
   window.visualViewport.addEventListener("resize", handleViewportResize);
@@ -560,5 +588,5 @@ window.addEventListener("resize", () => {
   }
 });
 
-// Start animation
+// Start
 requestAnimationFrame(animate);

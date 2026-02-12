@@ -66,7 +66,7 @@
         </div>
 
         <p class="confirm-note">
-          (Put your image at <code>assets/confirm.jpg</code>)
+          (Put your image at <code>assets/confirm.jpeg</code>)
         </p>
       </div>
     </section>
@@ -97,7 +97,7 @@
       </footer>
     </section>
 
-    <!-- VIDEO SCREEN (ONLY SHOWN AFTER HEART COMPLETE) -->
+    <!-- VIDEO SCREEN -->
     <section id="videoScreen" class="screen video-screen" hidden aria-label="Video screen">
       <header class="topbar">
         <div class="topbar-left">
@@ -112,13 +112,10 @@
           Happy Valentine’s Day ❤️ I’m so lucky to have you.
         </p>
 
-        <video
-          id="valentineVideo"
-          class="video"
-          controls
-          playsinline
-          preload="metadata"
-          src="assets/valentine.mp4">
+        <div id="videoErrorBox" class="video-error" hidden></div>
+
+        <video id="valentineVideo" class="video" controls playsinline preload="metadata">
+          <source src="assets/valentine.mp4" type="video/mp4" />
           Sorry — your browser can’t play this video.
         </video>
 
