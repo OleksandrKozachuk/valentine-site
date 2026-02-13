@@ -20,6 +20,7 @@ function goConfirm() {
   sessionStorage.setItem("heartDone", "0");
   sessionStorage.setItem("sudokuDone", "0");
   sessionStorage.setItem("quizDone", "0");
+  sessionStorage.setItem("revealDone", "0");
   window.location.href = "confirm.html";
 }
 

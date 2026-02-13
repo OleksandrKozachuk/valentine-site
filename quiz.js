@@ -124,8 +124,9 @@ function handleNext() {
   // correct
   if (current === questions.length - 1) {
     sessionStorage.setItem("quizDone", "1");
+    sessionStorage.setItem("revealDone", "0");
     showToast("Unlocked 💗");
-    setTimeout(() => (window.location.href = "video.html"), 450);
+    setTimeout(() => (window.location.href = "reveal.html"), 450);
     return;
   }
 

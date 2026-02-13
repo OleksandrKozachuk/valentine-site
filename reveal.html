@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>💗 Just one more</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="bg-night">
+  <div class="fullscreen">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="top-title">💗 Just one more</div>
+        <div class="top-subtitle">Before the final surprise…</div>
+      </div>
+      <a class="btn ghost small" href="index.html">Close</a>
+    </header>
+
+    <div id="gate" class="panel" hidden></div>
+
+    <div id="content" class="panel reveal-wrap" style="flex:1;">
+      <img id="finalImg" class="reveal-img" alt="A special image" />
+      <div class="reveal-text">
+        <div class="reveal-title">This is for you 💖</div>
+        <div class="reveal-subtitle">Ready for the final page?</div>
+      </div>
+
+      <button id="nextBtn" class="btn yes" type="button">Next 💞</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="config.js"></script>
+  <script src="reveal.js"></script>
+</body>
+</html>

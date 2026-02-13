@@ -3,6 +3,7 @@ const C = window.APP_CONFIG;
 const heartDone = sessionStorage.getItem("heartDone") === "1";
 const sudokuDone = sessionStorage.getItem("sudokuDone") === "1";
 const quizDone = sessionStorage.getItem("quizDone") === "1";
+const revealDone = sessionStorage.getItem("revealDone") === "1";
 
 const gate = document.getElementById("gate");
 const content = document.getElementById("content");
@@ -31,7 +32,7 @@ if (!heartDone) {
 } else if (!sudokuDone) {
   showGate(`
     One more step 💗<br>
-    Solve the mini Sudoku to unlock the video.
+    Solve the mini Sudoku.
     <div style="margin-top:10px;">
       <a class="btn yes" href="sudoku.html" style="display:inline-block; text-decoration:none;">Go to Sudoku</a>
     </div>
@@ -39,9 +40,17 @@ if (!heartDone) {
 } else if (!quizDone) {
   showGate(`
     One more step 💗<br>
-    Complete the quiz to unlock the video.
+    Complete the quiz.
     <div style="margin-top:10px;">
       <a class="btn yes" href="quiz.html" style="display:inline-block; text-decoration:none;">Go to Quiz</a>
+    </div>
+  `);
+} else if (!revealDone) {
+  showGate(`
+    One more step 💗<br>
+    Go through the last page first.
+    <div style="margin-top:10px;">
+      <a class="btn yes" href="reveal.html" style="display:inline-block; text-decoration:none;">Go to Next</a>
     </div>
   `);
 } else {
