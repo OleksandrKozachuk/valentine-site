@@ -23,11 +23,7 @@ function showGate(html) {
 
 if (!heartDone) {
   showGate(`
-    This page is locked 💗<br>
-    Please complete the constellation first.
-    <div style="margin-top:10px;">
-      <a class="btn yes" href="sky.html" style="display:inline-block; text-decoration:none;">Go to the sky</a>
-    </div>
+    This page is locked 💗
   `);
 } else if (!sudokuDone) {
   showGate(`

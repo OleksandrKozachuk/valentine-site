@@ -434,39 +434,62 @@ h1{
   }
 }
 
-/* ---- Reveal page ---- */
+/* ---- Reveal page (full-screen image + bottom button) ---- */
 .reveal-wrap{
+  flex: 1;
   display:flex;
   flex-direction:column;
-  align-items:center;
   gap:12px;
+
+  /* remove panel padding look — make it full screen */
+  padding:0;
+  background:transparent;
+  border:0;
 }
 
 .reveal-img{
-  width:min(620px, 96vw);
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  border-radius:20px;
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(0,0,0,.22);
-  box-shadow: 0 22px 60px rgba(0,0,0,.22);
+  /* Full available height (above the bottom button) */
+  flex: 1 1 auto;
+  min-height: 0;
+
+  /* Fill the area without cropping to "half" view */
+  width: 100%;
+  height: 100%;
+
+  /* Choose one:
+     - contain = always show whole image (no cropping) + may leave side bars
+     - cover = fills entire area (can crop edges slightly)
+  */
+  object-fit: contain;
+
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.22);
 }
 
+/* Hide/remove the text block completely */
 .reveal-text{
-  width:min(620px, 96vw);
-  text-align:center;
-  padding:12px;
-  border-radius:18px;
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.12);
+  display:none;
 }
 
-.reveal-title{
-  font-weight:950;
-  font-size: clamp(18px, 2.3vw, 22px);
+/* Bottom button pinned */
+.reveal-wrap .btn.yes{
+  width: 100%;
+  border-radius: 18px;
+  padding: 16px 16px;
+  font-size: 16px;
+
+  /* keep it above iPhone home indicator */
+  margin-top: 6px;
+  margin-bottom: env(safe-area-inset-bottom);
 }
 
-.reveal-subtitle{
-  margin-top:6px;
-  opacity:.9;
+/* Make image truly full-width on small screens (no extra margins) */
+@media (max-width: 520px){
+  .reveal-img{
+    border-radius: 16px;
+  }
+  .reveal-wrap .btn.yes{
+    border-radius: 16px;
+  }
 }
