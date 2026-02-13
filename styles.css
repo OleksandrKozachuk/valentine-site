@@ -305,53 +305,131 @@ h1{
   border:2px solid rgba(255, 120, 160, 0.8);
   background:rgba(255, 120, 160, 0.16);
 }
-/* ---- Quiz ---- */
+
+/* ---- Quiz (improved) ---- */
 .quiz-wrap{
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:14px;
 }
 
+/* small progress pill */
 .quiz-progress{
-  opacity:.9;
-  font-weight:900;
-  font-size:14px;
+  align-self:flex-start;
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  font-weight:950;
+  letter-spacing:.2px;
 }
 
+/* question card */
 .quiz-question{
+  padding:14px 14px;
+  border-radius:18px;
+  background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+  border:1px solid rgba(255,255,255,.14);
   font-weight:950;
-  font-size:20px;
+  font-size: clamp(18px, 2.2vw, 22px);
+  line-height:1.25;
+  box-shadow: 0 18px 50px rgba(0,0,0,.18);
+}
+
+/* options grid (nice on phones) */
+.quiz-options{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:10px;
+}
+
+/* option buttons */
+.quiz-option{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px 14px;
+  border-radius:18px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.14);
+  cursor:pointer;
+  user-select:none;
+  transition: transform .12s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.quiz-option:hover{
+  transform: translateY(-1px);
+  background:rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.20);
+  box-shadow: 0 18px 46px rgba(0,0,0,.16);
+}
+
+.quiz-option:active{
+  transform: translateY(0px) scale(.99);
+}
+
+/* hide default radio circle, we’ll draw our own */
+.quiz-option input{
+  position:absolute;
+  opacity:0;
+  pointer-events:none;
+}
+
+/* custom radio bubble */
+.quiz-option::before{
+  content:"";
+  width:18px;
+  height:18px;
+  border-radius:999px;
+  border:2px solid rgba(255,255,255,.38);
+  box-shadow: 0 0 0 6px rgba(255,255,255,.04);
+  flex:0 0 auto;
+}
+
+/* text */
+.quiz-option span{
+  font-weight:900;
+  font-size:16px;
   line-height:1.2;
 }
 
-.quiz-options{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+/* selected state */
+.quiz-option:has(input:checked){
+  background:linear-gradient(90deg, rgba(255,63,122,.18), rgba(255,122,162,.10));
+  border-color: rgba(255,122,162,.35);
+  box-shadow: 0 22px 58px rgba(255,77,125,.14);
 }
 
-.quiz-option{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:12px;
-  border-radius:16px;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.12);
-  cursor:pointer;
-  user-select:none;
+.quiz-option:has(input:checked)::before{
+  border-color: rgba(255,122,162,.95);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,.95) 0 45%, transparent 46%),
+    radial-gradient(circle at 35% 35%, rgba(255,255,255,.65), rgba(255,122,162,.95));
 }
 
-.quiz-option input{
-  width:18px;
-  height:18px;
-  accent-color: #ff7aa2;
-}
-
-.quiz-option span{
-  font-weight:850;
-}
-
+/* Next/Finish pinned nicely */
 .quiz-actions{
   margin-top:auto;
+  padding-top:6px;
+}
+
+/* make the button feel premium on dark bg (uses your existing .btn styles) */
+.quiz-actions .btn{
+  width:min(520px, 100%);
+  align-self:center;
+  border-radius:18px;
+  padding:16px 16px;
+  font-size:16px;
+}
+
+/* slightly larger tap targets on small phones */
+@media (max-width:420px){
+  .quiz-option{
+    padding:14px 12px;
+    border-radius:16px;
+  }
+  .quiz-option span{
+    font-size:15px;
+  }
 }
